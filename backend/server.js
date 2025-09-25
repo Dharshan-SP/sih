@@ -46,17 +46,16 @@ function parseNmapOutput(nmapOutput) {
 // Nmap scan endpoint
 app.post('/api/scan', async (req, res) => {
   const { target } = req.body;
-  const nmapCmd = `nmap -Pn ${target}`;
+  const nmapCmd = `nmap ${target}`;
   exec(nmapCmd, { timeout: 60000 }, (error, stdout, stderr) => {
-    if (error) {
-      return res.status(500).json({ error: stderr || error.message });
-    }
-    const parsed = parseNmapOutput(stdout);
+    // Always return 200 OK with a result, even on error
+    const output = stdout || stderr || (error && error.message) || 'Nmap scan failed.';
+    const parsed = parseNmapOutput(output);
     res.json({
       results: [
         {
           tool: 'nmap',
-          command: nmapCmd, // <-- add this line
+          command: nmapCmd,
           output: parsed.raw_output,
           vulnerabilities: [],
         }

@@ -32,22 +32,12 @@ const runNmap = (target, intensity = 'low') => {
   const command = `/usr/bin/nmap ${flags} ${target}`;
   return new Promise((resolve) => {
     exec(command, (err, stdout, stderr) => {
-      if (err) {
-        console.error('Nmap error:', err);
-        resolve({
-          tool: 'nmap',
-          command,
-          output: stderr || err.message,
-          vulnerabilities: [],
-        });
-      } else {
-        resolve({
-          tool: 'nmap',
-          command,
-          output: stdout,
-          vulnerabilities: [],
-        });
-      }
+      resolve({
+        tool: 'nmap',
+        command,
+        output: stdout || stderr || (err && err.message) || 'Nmap scan failed.',
+        vulnerabilities: [],
+      });
     });
   });
 };

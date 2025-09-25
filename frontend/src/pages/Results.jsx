@@ -38,9 +38,10 @@ export default function Results() {
 
   if (loading) return <div className="p-10">Running scan on {target}...</div>;
 
-  const nmapResult = Array.isArray(results)
-    ? results.find(r => r.tool && r.tool.toLowerCase() === 'nmap')
-    : null;
+  const safeResults = Array.isArray(results) ? results : [];
+  const safeAttackPath = Array.isArray(attackPath) ? attackPath : [];
+
+  const nmapResult = safeResults.find(r => r.tool && r.tool.toLowerCase() === 'nmap');
 
   return (
     <div className="p-10">
@@ -53,7 +54,7 @@ export default function Results() {
       </button>
       <div className="space-y-6">
         {/* Nmap Results Section */}
-        {nmapResult && (
+        {nmapResult && nmapResult.output && (
           <div className="border p-4 rounded shadow">
             <h2 className="font-bold mb-2">Nmap Scan Output</h2>
             <div className="mb-2 text-sm text-gray-700">
@@ -67,7 +68,7 @@ export default function Results() {
         )}
 
         {/* Other Tool Results */}
-        {results.map((r, idx) => (
+        {safeResults.map((r, idx) => (
           r.tool.toLowerCase() !== 'nmap' && (
             <div key={idx} className="border p-4 rounded shadow">
               <h2 className="font-bold mb-2">{r.tool.toUpperCase()}</h2>
@@ -86,14 +87,12 @@ export default function Results() {
           )
         ))}
 
-        {attackPath.length > 0 && (
+        {safeAttackPath.length > 0 && (
           <div className="border p-4 rounded shadow">
             <h2 className="font-bold mb-2">Suggested Attack Path</h2>
             <ul className="list-decimal ml-5">
-              {attackPath.map((step, i) => (
-                <li key={i}>
-                  {step.step} (via {step.tool.toUpperCase()})
-                </li>
+              {safeAttackPath.map((step, i) => (
+                <li key={i}>{step.step}</li>
               ))}
             </ul>
           </div>
