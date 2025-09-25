@@ -1,7 +1,11 @@
 const express = require('express');
 const { Pool } = require('pg');
+const { exec } = require('child_process');
+const cors = require('cors');
+
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const pool = new Pool({
   user: 'sp', // your PostgreSQL username
@@ -38,5 +42,28 @@ function parseNmapOutput(nmapOutput) {
     raw_output: nmapOutput
   };
 }
+
+// Nmap scan endpoint
+app.post('/api/scan', async (req, res) => {
+  const { target } = req.body;
+  const nmapCmd = `nmap -Pn ${target}`;
+  exec(nmapCmd, { timeout: 60000 }, (error, stdout, stderr) => {
+    if (error) {
+      return res.status(500).json({ error: stderr || error.message });
+    }
+    const parsed = parseNmapOutput(stdout);
+    res.json({
+      results: [
+        {
+          tool: 'nmap',
+          command: nmapCmd, // <-- add this line
+          output: parsed.raw_output,
+          vulnerabilities: [],
+        }
+      ],
+      attackPath: []
+    });
+  });
+});
 
 app.listen(5000, () => console.log('Server running on port 5000'));

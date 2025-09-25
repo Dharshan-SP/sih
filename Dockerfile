@@ -25,23 +25,28 @@ RUN cd frontend && npx vite build
 # ------------------------
 FROM node:22-slim
 
-WORKDIR /app
+WORKDIR /app/backend
 
-# Install backend dependencies and security tools
+# Install system dependencies and tools
 RUN apt-get update && \
     apt-get install -y nmap perl git && \
-    git clone https://github.com/sullo/nikto.git /usr/local/nikto
+    git clone https://github.com/sullo/nikto.git /usr/local/nikto && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY backend/package*.json ./backend/
-RUN cd backend && npm install
+# Copy package files first and install dependencies
+COPY backend/package*.json ./
+RUN npm install
 
-COPY backend ./backend
+# Copy backend source code
+COPY backend ./
 
-COPY --from=builder /app/frontend/dist ./backend/public
+# Copy frontend build into backend/public
+COPY --from=builder /app/frontend/dist ./public
 
+# Create non-root user
 RUN useradd -m appuser && chown -R appuser /app
 USER appuser
 
-WORKDIR /app/backend
 EXPOSE 5000
+
 CMD ["npm", "start"]

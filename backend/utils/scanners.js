@@ -29,14 +29,25 @@ const runNmap = (target, intensity = 'low') => {
   if (intensity === 'high') flags = '-sV -O -A';
   if (intensity === 'aggressive') flags = '-sV -O -A -T4';
 
+  const command = `/usr/bin/nmap ${flags} ${target}`;
   return new Promise((resolve) => {
-    exec(`/usr/bin/nmap ${flags} ${target}`, (err, stdout, stderr) => {
-      if (err) console.error('Nmap error:', err);
-      resolve({
-        tool: 'nmap',
-        output: stdout,
-        vulnerabilities: [],
-      });
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        console.error('Nmap error:', err);
+        resolve({
+          tool: 'nmap',
+          command,
+          output: stderr || err.message,
+          vulnerabilities: [],
+        });
+      } else {
+        resolve({
+          tool: 'nmap',
+          command,
+          output: stdout,
+          vulnerabilities: [],
+        });
+      }
     });
   });
 };
