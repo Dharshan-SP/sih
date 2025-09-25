@@ -6,8 +6,8 @@ const router = express.Router();
 router.get('/nmap', (req, res) => {
   const target = req.query.target;
   if (!target) return res.status(400).send('Missing target');
-  exec(`nmap ${target}`, (error, stdout, stderr) => {
-    if (error) return res.status(500).send(stderr);
+  exec(`docker run --rm sih-tools nmap  ${target}`, (error, stdout, stderr) => {
+    if (error) return res.status(500).send(stderr || error.message);
     res.send(stdout);
   });
 });
@@ -15,8 +15,8 @@ router.get('/nmap', (req, res) => {
 router.get('/nikto', (req, res) => {
   const target = req.query.target;
   if (!target) return res.status(400).send('Missing target');
-  exec(`nikto -h ${target}`, (error, stdout, stderr) => {
-    if (error) return res.status(500).send(stderr);
+  exec(`docker run --rm sih-tools perl /usr/local/nikto/program/nikto.pl -host ${target}`, (error, stdout, stderr) => {
+    if (error) return res.status(500).send(stderr || error.message);
     res.send(stdout);
   });
 });

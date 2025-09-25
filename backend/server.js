@@ -2,6 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const { exec } = require('child_process');
 const cors = require('cors');
+const { runAllScanners } = require('./utils/scanners'); // Add this import
 
 const app = express();
 app.use(express.json());
@@ -45,24 +46,23 @@ function parseNmapOutput(nmapOutput) {
 
 // Nmap scan endpoint
 app.post('/api/scan', async (req, res) => {
-  const { target } = req.body;
-  const nmapCmd = `nmap ${target}`;
-  exec(nmapCmd, { timeout: 60000 }, (error, stdout, stderr) => {
-    // Always return 200 OK with a result, even on error
-    const output = stdout || stderr || (error && error.message) || 'Nmap scan failed.';
-    const parsed = parseNmapOutput(output);
+  const { target, tools, intensity } = req.body;
+  try {
+    const results = await runAllScanners(target, tools || ['nmap'], intensity || 'low');
+    res.json({ results, attackPath: [] });
+  } catch (error) {
     res.json({
       results: [
         {
           tool: 'nmap',
-          command: nmapCmd,
-          output: parsed.raw_output,
+          command: '',
+          output: error.message || 'Scan failed.',
           vulnerabilities: [],
         }
       ],
       attackPath: []
     });
-  });
+  }
 });
 
 app.listen(5000, () => console.log('Server running on port 5000'));

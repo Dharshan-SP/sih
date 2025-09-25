@@ -29,9 +29,10 @@ const runNmap = (target, intensity = 'low') => {
   if (intensity === 'high') flags = '-sV -O -A';
   if (intensity === 'aggressive') flags = '-sV -O -A -T4';
 
-  const command = `/usr/bin/nmap ${flags} ${target}`;
+  // Run Nmap inside the Docker tools image
+  const command = `docker run --rm sih-tools nmap ${flags} ${target}`;
   return new Promise((resolve) => {
-    exec(command, (err, stdout, stderr) => {
+    exec(command, { timeout: 120000 }, (err, stdout, stderr) => {
       resolve({
         tool: 'nmap',
         command,
@@ -44,19 +45,14 @@ const runNmap = (target, intensity = 'low') => {
 
 // Run Nikto inside Docker
 const runNikto = (target) => {
+  const command = `docker run --rm sih-tools perl /usr/local/nikto/program/nikto.pl -host ${target}`;
   return new Promise((resolve) => {
-    exec(`perl /usr/local/nikto/program/nikto.pl -host ${target}`, (err, stdout, stderr) => {
-      if (err) console.error('Nikto error:', err);
+    exec(command, { timeout: 120000 }, (err, stdout, stderr) => {
       resolve({
         tool: 'nikto',
-        vulnerabilities: [
-          {
-            cve: 'CVE-2022-54321',
-            cvss: 5.0,
-            description: stdout.slice(0, 200) + '...',
-            component: 'nginx 1.20',
-          },
-        ],
+        command,
+        output: stdout || stderr || (err && err.message) || 'Nikto scan failed.',
+        vulnerabilities: [],
       });
     });
   });
