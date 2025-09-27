@@ -1,14 +1,17 @@
-<---- Backend ---> 
-cd backend
-npm i 
-npm start 
+<---- Backend ---> </br>
+cd backend </br>
+npm i </br>
+npm start </br>
 
+</br>
 
-<---- frontend ---->
-cd frontend
-npm i
-npm run dev
+<---- frontend ----></br>
+cd frontend</br>
+npm i</br>
+npm run dev</br>
 
+</br>
 
-<---- docker ---->
-docker build -t sih-tools .  (main directory)
+<---- docker ----></br>
+docker build -t sih-tools .  (main directory)</br>
+</br>
