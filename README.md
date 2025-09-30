@@ -1,4 +1,3 @@
-
 <---- Backend ---> </br>
 cd backend </br>
 npm i </br>
@@ -16,6 +15,3 @@ npm run dev</br>
 <---- docker ----></br>
 docker build -t sih-tools .  (main directory)</br>
 </br>
-
-
-
