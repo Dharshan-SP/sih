@@ -18,7 +18,4 @@ docker build -t sih-tools .  (main directory)</br>
 </br>
 
 
-<---- docker ---->
-docker build -t sih-tools . (main directory)
-
 
