@@ -33,5 +33,11 @@ RUN apt-get update && \
     git clone https://github.com/sullo/nikto.git /usr/local/nikto && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Recon-ng
+RUN apt-get update && \
+    apt-get install -y python3-pip && \
+    pip3 install recon-ng && \
+    rm -rf /var/lib/apt/lists/*
+
 # Set default shell
 CMD ["/bin/bash"]

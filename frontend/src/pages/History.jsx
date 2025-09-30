@@ -1,54 +1,80 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const API_URL = 'http://localhost:5000';
+
 export default function History() {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch history from backend
+  // Fetch scan history from backend
   useEffect(() => {
-    fetch('/api/scans')
-      .then(res => res.json())
-      .then(data => setItems(data));
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/scans`);
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const data = await res.json();
+        setItems(data);
+      } catch (err) {
+        console.error('Failed to fetch scans:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
   }, []);
 
-  // Add a scan to history (call this after a scan)
-  const addScan = async (scan) => {
-    await fetch('/api/scans', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(scan)
-    });
-    setItems([scan, ...items]);
-  };
+  if (loading) return <div className="p-6">Loading scan history...</div>;
+  if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
 
   return (
     <main className="p-6 w-full">
       <h1 className="text-2xl font-bold">Scan History</h1>
-      <div className="mt-4 bg-white border rounded p-4">
-        <table className="w-full text-sm">
-          <thead className="text-left text-slate-500">
-            <tr>
-              <th>Scan ID</th>
-              <th>Target</th>
-              <th>Date</th>
-              <th>Findings</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(i => (
-              <tr key={i.id} className="border-t">
-                <td>{i.id}</td>
-                <td>{i.target}</td>
-                <td>{i.date}</td>
-                <td>{i.vulns}</td>
-                <td>
-                  <Link to="/results" className="text-sky-600">View</Link>
-                </td>
+      <div className="mt-4 bg-white border rounded p-4 overflow-x-auto">
+        {items.length === 0 ? (
+          <div className="text-gray-500">No scans found.</div>
+        ) : (
+          <table className="w-full text-sm table-auto">
+            <thead className="text-left text-slate-500 border-b">
+              <tr>
+                <th className="px-2 py-1">Scan ID</th>
+                <th className="px-2 py-1">Target</th>
+                <th className="px-2 py-1">Date</th>
+                <th className="px-2 py-1">Findings</th>
+                <th className="px-2 py-1">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {items.map((i) => (
+                <tr key={i.id} className="border-b hover:bg-gray-50">
+                  <td className="px-2 py-1">{i.id}</td>
+                  <td className="px-2 py-1">{i.target}</td>
+                  <td className="px-2 py-1">{new Date(i.date).toLocaleString()}</td>
+                  <td className="px-2 py-1">
+                    {i.vulns
+                      ? (() => {
+                          try {
+                            const vulns = JSON.parse(i.vulns);
+                            return vulns.length > 0 ? vulns.join(', ') : '-';
+                          } catch {
+                            return i.vulns;
+                          }
+                        })()
+                      : '-'}
+                  </td>
+                  <td className="px-2 py-1">
+                    <Link to={`/results/${i.id}`} className="text-sky-600 hover:underline">
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </main>
   );

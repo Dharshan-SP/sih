@@ -52,6 +52,39 @@ export default function Scan() {
         <option value="high">High</option>
         <option value="aggressive">Aggressive</option>
       </select>
+      <label className="block mb-2 font-semibold">Select Tools:</label>
+      <div className="mb-4">
+        <label className="inline-flex items-center">
+          <input
+            type="checkbox"
+            value="nmap"
+            checked={selectedTools.includes('nmap')}
+            onChange={e => {
+              const tool = e.target.value;
+              setSelectedTools(prev =>
+                prev.includes(tool) ? prev.filter(t => t !== tool) : [...prev, tool]
+              );
+            }}
+            className="mr-2"
+          />
+          Nmap
+        </label>
+        <label className="inline-flex items-center ml-4">
+          <input
+            type="checkbox"
+            value="recon-ng"
+            checked={selectedTools.includes('recon-ng')}
+            onChange={e => {
+              const tool = e.target.value;
+              setSelectedTools(prev =>
+                prev.includes(tool) ? prev.filter(t => t !== tool) : [...prev, tool]
+              );
+            }}
+            className="mr-2"
+          />
+          Recon-ng
+        </label>
+      </div>
       <button
         onClick={handleScan}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"

@@ -29,6 +29,7 @@ return (
 <Route path="/history" element={<History/>} />
 <Route path="/reports" element={<Reports/>} />
 <Route path="/settings" element={<Settings/>} />
+<Route path="/results/:id" element={<Results />} /> {/* Dynamic route */}
 <Route path="/help" element={<Help/>} />
 </Routes>
 </div>
